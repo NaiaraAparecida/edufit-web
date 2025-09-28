@@ -1,0 +1,20 @@
+{
+  // faz o VS Code tratar .css como Tailwind v4
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+
+  // silencia o linter CSS nativo sobre @theme/@apply etc.
+  "css.lint.unknownAtRules": "ignore",
+
+  // melhora as sugestões dentro de strings/classes
+  "editor.quickSuggestions": { "strings": true },
+
+  // garante que a extensão carregue o tailwind da pasta do projeto
+  "tailwindCSS.emmetCompletions": true,
+  "tailwindCSS.language": "css",
+  "tailwindCSS.includeLanguages": {
+    "plaintext": "css",
+    "postcss": "css"
+  }
+}

@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+/* ===== EduFit tokens ===== */
+:root{
+  --edufit-primary: #0A4C86;   /* azul EduFit */
+  --edufit-accent:  #FF7A00;   /* laranja EduFit */
+  --edufit-text:    #0F172A;
+  --edufit-muted:   #64748B;
+  --edufit-card:    #FFFFFF;
+  --edufit-border:  #E2E8F0;
+}
+html,body{ color: var(--edufit-text); background:#fff; }
