@@ -1,36 +1,62 @@
-"use client";
-import { useEffect, useState } from "react";
-import Image from "next/image";
+'use client';
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { api } from '@/lib/api';
 
-type Profile = { name: string; avatarUrl?: string | null };
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || "";
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl?: string | null;
+};
 
 export default function ProfilePage() {
-  const [form, setForm] = useState<Profile>({ name: "", avatarUrl: "" });
+  const [form, setForm] = useState<User | null>(null);
   const [busy, setBusy] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(BASE + "/api/me")
-      .then((r) => r.json() as Promise<Profile>)
-      .then((p) => setForm({ name: p.name, avatarUrl: p.avatarUrl ?? "" }))
-      .finally(() => setBusy(false));
+    let mounted = true;
+    (async () => {
+      try {
+        const me = await api.get<User>('/api/me');
+        if (mounted) setForm({ ...me, avatarUrl: me.avatarUrl ?? '' });
+      } catch (e: unknown) {
+        const m = e instanceof Error ? e.message : 'Falha ao carregar perfil.';
+        if (mounted) setErr(m);
+      } finally {
+        if (mounted) setBusy(false);
+      }
+    })();
+    return () => { mounted = false; };
   }, []);
 
   const save = async () => {
+    if (!form) return;
     setSaving(true);
-    const r = await fetch(BASE + "/api/me", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    const p = (await r.json()) as Profile;
-    setForm({ name: p.name, avatarUrl: p.avatarUrl ?? "" });
-    setSaving(false);
-    alert("Perfil atualizado!");
+    setMsg(null);
+    setErr(null);
+    try {
+      const updated = await api.put<User>('/api/me', {
+        name: form.name,
+        email: form.email,
+        avatarUrl: form.avatarUrl || null,
+      });
+      setForm({ ...updated, avatarUrl: updated.avatarUrl ?? '' });
+      setMsg('Salvo!');
+    } catch (e: unknown) {
+      const m = e instanceof Error ? e.message : 'Não foi possível salvar.';
+      setErr(m);
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (busy) return <p>Carregando…</p>;
+  if (err && !form) return <p className="text-red-600">{err}</p>;
+  if (!form) return null;
 
   return (
     <div className="max-w-xl space-y-3">
@@ -38,7 +64,6 @@ export default function ProfilePage() {
 
       {form.avatarUrl ? (
         <div className="h-20 w-20 overflow-hidden rounded-full border">
-          {/* ✅ Next Image com width/height para performance */}
           <Image
             src={form.avatarUrl}
             alt="Avatar"
@@ -51,28 +76,44 @@ export default function ProfilePage() {
         <div className="h-20 w-20 rounded-full border bg-slate-50" />
       )}
 
-      <label className="text-sm text-[var(--edufit-muted,#64748B)]">Nome</label>
+      <label className="text-sm text-[var(--edufit-muted,#64748B)]" htmlFor="name">Nome</label>
       <input
+        id="name"
         className="h-10 w-full rounded-md border px-3"
         value={form.name}
         onChange={(e) => setForm({ ...form, name: e.target.value })}
       />
 
-      <label className="text-sm text-[var(--edufit-muted,#64748B)]">Avatar URL</label>
+      <label className="text-sm text-[var(--edufit-muted,#64748B)]" htmlFor="email">E-mail</label>
       <input
+        id="email"
         className="h-10 w-full rounded-md border px-3"
-        value={form.avatarUrl ?? ""}
+        type="email"
+        value={form.email}
+        onChange={(e) => setForm({ ...form, email: e.target.value })}
+      />
+
+      <label className="text-sm text-[var(--edufit-muted,#64748B)]" htmlFor="avatar">Avatar URL</label>
+      <input
+        id="avatar"
+        className="h-10 w-full rounded-md border px-3"
+        value={form.avatarUrl ?? ''}
         onChange={(e) => setForm({ ...form, avatarUrl: e.target.value })}
       />
 
-      <button
-        onClick={save}
-        disabled={saving}
-        className="inline-flex h-10 items-center justify-center rounded-md bg-[var(--edufit-accent,#FF7A00)] px-4 font-semibold text-white hover:opacity-90 disabled:opacity-50"
-      >
-        Salvar
-      </button>
+      <div className="flex items-center gap-3 pt-2">
+        <button
+          onClick={save}
+          disabled={saving}
+          className="inline-flex h-10 items-center justify-center rounded-md bg-[var(--edufit-accent,#FF7A00)] px-4 font-semibold text-white hover:opacity-90 disabled:opacity-50"
+        >
+          {saving ? 'Salvando…' : 'Salvar'}
+        </button>
+        {msg && <span className="text-sm text-green-600">{msg}</span>}
+        {err && <span className="text-sm text-red-600">{err}</span>}
+      </div>
     </div>
   );
 }
+
 

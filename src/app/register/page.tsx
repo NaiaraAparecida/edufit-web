@@ -1,41 +1,41 @@
-"use client";
-import { useState } from "react";
+'use client';
+import { useState } from 'react';
+import Link from 'next/link';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { api } from '@/lib/api';
 
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || "";
+const schema = z.object({
+  name: z.string().min(2, 'Nome muito curto'),
+  email: z.string().email('Email inválido'),
+  password: z.string().min(6, 'Mínimo 6 caracteres'),
+});
+
+type FormData = z.infer<typeof schema>;
 
 export default function RegisterPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [pass, setPass] = useState("");
-  const [busy, setBusy] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({ resolver: zodResolver(schema) });
 
-  const canSubmit = name.trim().length > 1 && email.trim().length > 3;
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!canSubmit || busy) return;
-    setBusy(true);
+  const onSubmit = async (data: FormData) => {
+    setServerError(null);
     try {
-      // mock de “criar conta” -> usa o mesmo /api/login e injeta o nome
-      const res = await fetch(BASE + "/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
-      });
-      if (!res.ok) throw new Error(await res.text());
-      const data = await res.json();
-      const user = { ...data.user, name: name.trim() };
-
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(user));
-      window.location.href = "/";
-  } catch (err) {
-    console.error("LOGIN_ERROR:", err);
-    alert("Não foi possível entrar. Confira sua conexão e tente novamente.");
-  } finally {
-      setBusy(false);
+      // backend esperado (mock ou real)
+      await api.post('/api/register', data);
+      // após criar conta, redireciona para login
+      window.location.href = '/login';
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : 'Não foi possível concluir o cadastro.';
+      setServerError(msg);
     }
-  }
+  };
 
   return (
     <div className="mx-auto grid min-h-[70vh] max-w-md place-content-center px-4">
@@ -48,60 +48,79 @@ export default function RegisterPage() {
         <h2 className="mb-1 text-xl font-bold">Criar conta</h2>
         <p className="mb-4 text-sm text-slate-600">Junte-se ao EduFit</p>
 
-        <form className="space-y-3" onSubmit={submit}>
+        <form className="space-y-3" onSubmit={handleSubmit(onSubmit)} noValidate>
           <div>
-            <label className="mb-1 block text-sm text-slate-600">Nome</label>
+            <label htmlFor="name" className="mb-1 block text-sm text-slate-600">
+              Nome
+            </label>
             <input
+              id="name"
               className="h-10 w-full rounded-md border px-3"
               placeholder="Seu nome"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              {...register('name')}
             />
+            {errors.name && (
+              <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+            )}
           </div>
 
           <div>
-            <label className="mb-1 block text-sm text-slate-600">E-mail</label>
+            <label htmlFor="email" className="mb-1 block text-sm text-slate-600">
+              E-mail
+            </label>
             <input
+              id="email"
               className="h-10 w-full rounded-md border px-3"
               placeholder="voce@exemplo.com"
               type="email"
               autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register('email')}
             />
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+            )}
           </div>
 
           <div>
-            <label className="mb-1 block text-sm text-slate-600">Senha</label>
+            <label htmlFor="password" className="mb-1 block text-sm text-slate-600">
+              Senha
+            </label>
             <input
+              id="password"
               className="h-10 w-full rounded-md border px-3"
               placeholder="••••••••"
               type="password"
               autoComplete="new-password"
-              value={pass}
-              onChange={(e) => setPass(e.target.value)}
+              {...register('password')}
             />
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+            )}
           </div>
+
+          {serverError && (
+            <p className="text-sm text-red-600">{serverError}</p>
+          )}
 
           <button
             type="submit"
-            disabled={!canSubmit || busy}
+            disabled={isSubmitting}
             className="inline-flex h-10 w-full items-center justify-center rounded-md bg-[var(--edufit-accent,#FF7A00)] px-4 font-semibold text-white hover:opacity-90 disabled:opacity-50"
           >
-            {busy ? "Criando…" : "Criar conta"}
+            {isSubmitting ? 'Criando…' : 'Criar conta'}
           </button>
         </form>
 
         <div className="my-4 h-px bg-[var(--edufit-border,#E2E8F0)]" />
 
         <p className="text-center text-sm text-slate-600">
-          Já tem conta?{" "}
-          <a
+          Já tem conta?{' '}
+          <Link
             href="/login"
             className="font-semibold text-[var(--edufit-primary,#0A4C86)] hover:underline"
           >
             Entrar
-          </a>
+          </Link>
         </p>
       </div>
 
@@ -111,3 +130,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

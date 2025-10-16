@@ -1,5 +1,9 @@
-"use client";
-import { useEffect, useRef, useState } from "react";
+'use client';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { api } from '@/lib/api';
+import Spinner from '@/components/feedback/Spinner';
+import Empty from '@/components/feedback/Empty';
+import ErrorMessage from '@/components/feedback/ErrorMessage';
 
 type Msg = {
   id: string | number;
@@ -9,54 +13,92 @@ type Msg = {
   createdAt: string;
 };
 
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || "";
-
 export default function ChatPage() {
   const [msgs, setMsgs] = useState<Msg[]>([]);
-  const [text, setText] = useState("");
+  const [text, setText] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
 
-  // ✅ Tipagem correta para setInterval
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const endRef = useRef<HTMLDivElement | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const load = () =>
-    fetch(BASE + "/api/messages?room=global")
-      .then((r) => r.json() as Promise<Msg[]>)
-      .then(setMsgs)
-      .catch(() => {});
-
-  useEffect(() => {
-    load();
-    timer.current = setInterval(load, 4000);
-    return () => {
-      if (timer.current) clearInterval(timer.current);
-    };
+  const load = useCallback(async () => {
+    try {
+      const data = await api.get<Msg[]>('/api/messages?room=global');
+      setMsgs(data);
+      setErr(null);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Erro ao carregar mensagens';
+      setErr(msg);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  async function send() {
-    if (!text.trim()) return;
-    await fetch(BASE + "/api/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ room: "global", userId: "u1", content: text.trim() }),
-    });
-    setText("");
-    load();
-  }
+  useEffect(() => {
+    void load();
+    pollRef.current = setInterval(load, 8000);
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [load]);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [msgs]);
+
+  const send = async () => {
+    const value = text.trim();
+    if (!value) return;
+    setText('');
+    try {
+      await api.post('/api/messages', {
+        room: 'global',
+        userId: 'u1', // TODO: substituir pelo userId do AuthContext
+        content: value,
+      });
+      await load();
+    } catch {
+      setText(value); // restaura o texto se falhar
+    }
+  };
+
+  const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      void send();
+    }
+  };
 
   return (
-    <div>
+    <div className="max-w-2xl mx-auto space-y-3">
       <h2 className="mb-3 text-xl font-bold text-[var(--edufit-primary,#0A4C86)]">Chat</h2>
 
-      <ul className="mb-3 space-y-3">
-        {msgs.map((m) => (
-          <li key={m.id} className="rounded-2xl border p-3">
-            <div className="text-xs text-[var(--edufit-muted,#64748B)]">
-              {m.userId} • {new Date(m.createdAt).toLocaleTimeString()}
-            </div>
-            <div className="mt-1">{m.content}</div>
-          </li>
-        ))}
-      </ul>
+      {loading && <Spinner label="Carregando mensagens…" />}
+      {err && <ErrorMessage message={err} />}
+
+      {!loading && !err && msgs.length === 0 && (
+        <Empty
+          title="Sem mensagens ainda"
+          description="Envie a primeira mensagem para iniciar a conversa."
+        />
+      )}
+
+      {!loading && !err && msgs.length > 0 && (
+        <div className="h-[60vh] rounded-2xl border bg-white p-3 overflow-auto">
+          <ul className="mb-3 space-y-3">
+            {msgs.map((m) => (
+              <li key={m.id} className="rounded-2xl border p-3">
+                <div className="text-xs text-[var(--edufit-muted,#64748B)]">
+                  {m.userId} • {new Date(m.createdAt).toLocaleTimeString()}
+                </div>
+                <div className="mt-1">{m.content}</div>
+              </li>
+            ))}
+          </ul>
+          <div ref={endRef} />
+        </div>
+      )}
 
       <div className="flex gap-2">
         <input
@@ -64,6 +106,8 @@ export default function ChatPage() {
           placeholder="Escreva uma mensagem…"
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onKeyDown={onKeyDown}
+          aria-label="Mensagem"
         />
         <button
           onClick={send}
@@ -75,4 +119,7 @@ export default function ChatPage() {
     </div>
   );
 }
+
+
+
 

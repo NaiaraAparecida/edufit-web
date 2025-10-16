@@ -10,3 +10,19 @@
   --edufit-border:  #E2E8F0;
 }
 html,body{ color: var(--edufit-text); background:#fff; }
+
+/* Acessibilidade: foco visível consistente */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.6); /* azul acessível */
+  border-radius: 6px;
+}
+
+/* Util classe para foco (p/ Tailwind + className) */
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.6);
+  border-radius: 6px;
+}
