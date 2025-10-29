@@ -33,15 +33,25 @@ Desenvolvida em **Next.js**, ela complementa o aplicativo mobile, permitindo **v
 ## 📂 Estrutura do Projeto
 
 edufit-web/
+
 ├── src/
+
 │ ├── app/ # Rotas e páginas principais
+
 │ ├── components/ # Componentes reutilizáveis (Header, Card, etc.)
+
 │ ├── lib/ # Funções utilitárias e hooks
+
 │ └── styles/ # Estilos globais (Tailwind)
+
 ├── public/ # Ícones, imagens e assets estáticos
+
 ├── prisma/ # Configurações do ORM (planejado)
+
 ├── package.json
+
 ├── .env.example
+
 └── README.md
 
 ---
