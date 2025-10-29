@@ -1,131 +1,132 @@
-# EduFit (Web)
-Aplicação **web** do EduFit construída com **Next.js (App Router)** + **APIs mock** + **Tailwind v4**.  
-Entrega páginas de **Vídeos**, **Desafios**, **Chat**, **Relatórios** e **Perfil**, além de rotas **/api/** consumidas pelo mobile.
+# 🌐 EduFit Web
 
-## ✨ Destaques
-- Next.js 14+ (App Router)
-- Tailwind CSS v4 (setup simples: `@import "tailwindcss"`)
-- Rotas de API em `/api/*` (mock em memória)
-- Design system leve nas cores do EduFit (azul/laranja)
-- Pronto para deploy na **Vercel**
-- Fácil de evoluir para **Supabase / Prisma + DB**
+**EduFit Web** é a versão web do ecossistema **EduFit — Educação e Movimento**, uma plataforma digital que une **tecnologia, esporte e aprendizado**.  
+Desenvolvida em **Next.js**, ela complementa o aplicativo mobile, permitindo **visualizar atividades, desafios e conteúdos educativos** diretamente do navegador.
 
-## 🔧 Stack
-- **Web:** Next.js, React, Tailwind v4
-- **APIs:** Next.js Route Handlers (`/src/app/api/**/route.ts`)
-- **Gráficos (futuro opcional):** Recharts ou Chart.js
-- **Auth real (futuro opcional):** Supabase Auth
+---
 
-## 📁 Estrutura
+## ☁️ Deploy
+- **Site (Vercel):** Em construção*  
+- **Repositório Mobile:** https://github.com/NaiaraAparecida/edufit-mobile  
 
-src/
-app/
-(páginas)/page.tsx
-api/
-login/route.ts
-videos/route.ts
-challenges/route.ts
-messages/route.ts
-reports/
-summary/route.ts
-progress/route.ts
-me/route.ts
-app/globals.css
-app/_ui/ (Button, Card, Badge, PageTitle)
+---
 
+## ✨ Recursos
+- Interface **responsiva e moderna** com **Next.js + Tailwind CSS**  
+- **Visualização** de atividades, desafios e conteúdos educativos  
+- Estrutura modular para **futuras integrações com API / backend**  
+- Arquitetura pronta para **autenticação e banco de dados (Prisma + Postgres)**  
+- Design limpo, educativo e acessível  
 
-## ▶️ Rodando localmente
+---
+
+## 🛠 Tecnologias
+- **Next.js 14 (App Router)**  
+- **React 19**  
+- **Tailwind CSS**  
+- **TypeScript / JavaScript**  
+- **Prisma + PostgreSQL** *(planejado)*  
+- **Vercel (deploy)**  
+
+---
+
+## 📂 Estrutura do Projeto
+
+edufit-web/
+├── src/
+│ ├── app/ # Rotas e páginas principais
+│ ├── components/ # Componentes reutilizáveis (Header, Card, etc.)
+│ ├── lib/ # Funções utilitárias e hooks
+│ └── styles/ # Estilos globais (Tailwind)
+├── public/ # Ícones, imagens e assets estáticos
+├── prisma/ # Configurações do ORM (planejado)
+├── package.json
+├── .env.example
+└── README.md
+
+---
+
+## 🚀 Como Rodar Localmente
+
 ```bash
-# 1) instale dependências
+# Clone o repositório
+git clone https://github.com/NaiaraAparecida/edufit-web.git
+
+# Entre na pasta
+cd edufit-web
+
+# Instale as dependências
 npm install
 
-# 2) crie variáveis de ambiente
-cp .env.local.example .env.local
-# edite se necessário:
-# NEXT_PUBLIC_BASE_URL=http://localhost:3000
-
-# 3) dev
+# Inicie o servidor
 npm run dev
+```
 
-# 4) build (verificação final)
-npm run build
-npm start
+O projeto rodará em:
+👉 http://localhost:3000
 
-.env.local
-NEXT_PUBLIC_BASE_URL=http://localhost:3000
+---
 
+## 🧩 Integração com o Ecossistema EduFit
+| Projeto | Repositório | Descrição |
+|-----------|--------|--------|
+| 🌐 EduFit Web | [edufit-web](https://github.com/NaiaraAparecida/edufit-web) | Plataforma web complementar (Next.js) |
+| 📱 EduFit Mobile | [edufit-mobile](https://github.com/NaiaraAparecida/edufit-mobile)| Aplicativo mobile principal (React Native + Expo) |
 
-🧪 Rotas de API (mock)
+---
 
-POST /api/login → { token, user }
-(Opcional GET informativo: “Use POST /api/login com { email }”)
+## 🧱 Roadmap
 
-GET /api/videos
+ - [x] Estrutura inicial com Next.js
 
-GET/POST /api/challenges
+ - [x] Estilos e componentes base (Tailwind)
 
-GET/POST /api/messages?room=global
+ - [ ] Integração com API / Backend
 
-GET /api/reports/summary
+ - [ ] Autenticação de usuários (Auth.js / Firebase)
 
-GET /api/reports/progress?range=30d
+ - [ ] Dashboard de relatórios e estatísticas
 
-GET/PUT /api/me
+ - [ ] Deploy final na Vercel
 
-Observação: handlers usam estado em memória, reiniciam ao reiniciar o servidor.
+---
 
-🖼️ Next/Image (domínios remotos)
+## 🎨 Design e UX
+- Interface moderna, acessível e responsiva
 
-Se usar avatares externos, configure next.config.(js|ts):
+- Cores principais: azul (#3B82F6), branco e tons neutros
 
-// next.config.js
-module.exports = {
-  images: { domains: ["i.pravatar.cc"] },
-};
+- Componentes com bordas suaves e tipografia limpa
 
-🎨 Tailwind v4 (sem @apply/@theme)
+- Layout otimizado para desktop, tablet e mobile
 
-src/app/globals.css:
+- Padrão de design unificado com o EduFit Mobile
 
-@import "tailwindcss";
-:root {
-  --edufit-primary: #0A4C86;
-  --edufit-accent:  #FF7A00;
-  --edufit-border:  #E2E8F0;
-  --edufit-text:    #0F172A;
-}
+---
 
+## 🤝 Contribuindo
 
-postcss.config.js:
+Contribuições são bem-vindas!
+Abra uma issue ou envie um pull request com suas melhorias.
 
-module.exports = { plugins: { '@tailwindcss/postcss': {} } };
+---
 
-🚀 Deploy (Vercel)
+## 📬 Contato
 
-Push no GitHub
+LinkedIn: www.linkedin.com/in/naiara-cruz
 
-Importar no Vercel
+Email: naiaraaparecida95@gmail.com
 
-Definir env (opcional): NEXT_PUBLIC_BASE_URL → deixar a própria URL do Vercel
+Portfólio: https://portfolio-site-naiara.netlify.app/
 
-Deploy
+---
 
-Após deploy, aponte o mobile para a URL pública do web.
+## 🧠 Autoria
 
-🧩 Roadmap
+Desenvolvido por:
 
- Persistência real (Supabase / Prisma + PostgreSQL)
+👩‍💻 Naiara Aparecida da Silva Cruz
 
- Gráfico de linha nos relatórios (Recharts)
+💼 Desenvolvedora Front-End & UX/UI Designer
 
- Autenticação real + e-mail/password
-
- Testes E2E (Playwright)
-
-🆘 Troubleshooting
-
-Tailwind v4 erro PostCSS → instale @tailwindcss/postcss e use o postcss.config.js acima
-
-405 em /api/login no navegador → é POST; use curl/Postman (ou adicione GET informativo)
-
-404 nas páginas → verifique caminho src/app/**/page.tsx e reinicie npm run dev
+🏫 FIAP — Global Solution 2025
